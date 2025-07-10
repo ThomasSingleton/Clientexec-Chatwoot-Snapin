@@ -1,0 +1,63 @@
+<script data-cfasync="false" type="text/javascript">
+
+    // Chatwoot Settings
+    window.chatwootSettings = {
+        hideMessageBubble: false,
+        position: "right",
+        locale: "en",
+        type: "expanded_bubble"
+    };
+
+    // Load Chatwoot SDK
+    (function(d,t) {
+        var BASE_URL = "<?php echo rtrim($this->baseUrl, '/'); ?>";
+        var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
+        g.src = BASE_URL + "/packs/js/sdk.js";
+        g.defer = true;
+        g.async = true;
+        s.parentNode.insertBefore(g,s);
+        g.onload = function() {
+            window.chatwootSDK.run({
+                websiteToken: '<?php echo $this->websiteToken; ?>',
+                baseUrl: BASE_URL
+            });
+        };
+    })(document, "script");
+
+    $(document).ready(function() {
+        // Wait for Chatwoot to be ready
+        window.addEventListener("chatwoot:ready", function () {
+            
+            <?php if ($this->email != '' && $this->userId != '') { ?>
+                
+                // Set user information
+                var userInfo = {
+                    email: '<?php echo $this->email; ?>',
+                    name: '<?php echo $this->name; ?>'
+                };
+
+                <?php if (!empty($this->identifierHash)) { ?>
+                    userInfo.identifier_hash = '<?php echo $this->identifierHash; ?>';
+                <?php } ?>
+
+                // Set the user in Chatwoot
+                window.$chatwoot.setUser('<?php echo $this->userId; ?>', userInfo);
+
+                // Set custom attributes for additional fields
+                var customAttributes = {};
+                <?php foreach ($this->additionalFields as $key => $value) { ?>
+                    <?php if ($value != '') { ?>
+                        customAttributes['<?php echo $key; ?>'] = '<?php echo addslashes($value); ?>';
+                    <?php } ?>
+                <?php } ?>
+
+                if (Object.keys(customAttributes).length > 0) {
+                    window.$chatwoot.setCustomAttributes(customAttributes);
+                }
+
+            <?php } ?>
+
+        });
+    });
+
+</script>
